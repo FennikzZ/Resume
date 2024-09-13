@@ -38,4 +38,5 @@ type Users struct {
    Contact   string     `json: "contact"`
    
    Profile   string `gorm:"type:longtext"`
+
 }

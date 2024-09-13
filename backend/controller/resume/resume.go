@@ -12,57 +12,111 @@ import (
 )
 
 func CreateResume(c *gin.Context) {
-	var resume entity.Resume
-	if err := c.ShouldBindJSON(&resume); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+    var payload struct {
+        PersonalID   uint `json:"personal_id"`
+        StudyID      uint `json:"study_id"`
+        ExperienceID uint `json:"experience_id"`
+        SkillID      uint `json:"skill_id"`
+    }
 
-	db := config.DB()
+    if err := c.ShouldBindJSON(&payload); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
 
-	// Save Personal if provided
-	if resume.PersonalID != 0 {
-		if err := db.Create(&resume.Personal).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create personal data"})
-			return
-		}
-		resume.PersonalID = resume.Personal.ID
-	}
+    db := config.DB()
 
-	// Save Study if provided
-	if resume.StudyID != 0 {
-		if err := db.Create(&resume.Study).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create study data"})
-			return
-		}
-		resume.StudyID = resume.Study.ID
-	}
+    // ดึงข้อมูลของผู้ใช้ที่ล็อคอินอยู่จาก context (หรือจาก token)
+    user, exists := c.Get("user")
+    if !exists {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+        return
+    }
 
-	// Save Experience if provided
-	if resume.ExperienceID != 0 {
-		if err := db.Create(&resume.Experience).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create experience data"})
-			return
-		}
-		resume.ExperienceID = resume.Experience.ID
-	}
+    // แปลงข้อมูลผู้ใช้เป็น type ที่ต้องการ
+    userID, ok := user.(uint)
+    if !ok {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user data"})
+        return
+    }
 
-	// Save Skill if provided
-	if resume.SkillID != 0 {
-		if err := db.Create(&resume.Skill).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create skill data"})
-			return
-		}
-		resume.SkillID = resume.Skill.ID
-	}
+    // สร้าง Resume ใหม่
+    resume := entity.Resume{
+        PersonalID:   payload.PersonalID,
+        StudyID:      payload.StudyID,
+        ExperienceID: payload.ExperienceID,
+        SkillID:      payload.SkillID,
+        UserID:       userID, // ใช้ UserID ของผู้ใช้ที่ล็อคอินอยู่
+    }
 
-	// Save Resume
-	if err := db.Create(&resume).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create resume"})
-		return
-	}
+    // ตรวจสอบข้อมูลที่เชื่อมโยงกับ Resume
+    if resume.PersonalID != 0 {
+        var personal entity.Personal
+        if err := db.First(&personal, resume.PersonalID).Error; err != nil {
+            c.JSON(http.StatusNotFound, gin.H{"error": "Personal data not found"})
+            return
+        }
+        resume.Personal = personal
+    } else if resume.Personal.FirstName != "" {
+        if err := db.Create(&resume.Personal).Error; err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create personal data"})
+            return
+        }
+        resume.PersonalID = resume.Personal.ID
+    }
 
-	c.JSON(http.StatusOK, resume)
+    if resume.StudyID != 0 {
+        var study entity.Study
+        if err := db.First(&study, resume.StudyID).Error; err != nil {
+            c.JSON(http.StatusNotFound, gin.H{"error": "Study data not found"})
+            return
+        }
+        resume.Study = study
+    } else if resume.Study.Education != "" {
+        if err := db.Create(&resume.Study).Error; err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create study data"})
+            return
+        }
+        resume.StudyID = resume.Study.ID
+    }
+
+    if resume.ExperienceID != 0 {
+        var experience entity.Experience
+        if err := db.First(&experience, resume.ExperienceID).Error; err != nil {
+            c.JSON(http.StatusNotFound, gin.H{"error": "Experience data not found"})
+            return
+        }
+        resume.Experience = experience
+    } else if resume.Experience.JobTitle != "" {
+        if err := db.Create(&resume.Experience).Error; err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create experience data"})
+            return
+        }
+        resume.ExperienceID = resume.Experience.ID
+    }
+
+    if resume.SkillID != 0 {
+        var skill entity.Skill
+        if err := db.First(&skill, resume.SkillID).Error; err != nil {
+            c.JSON(http.StatusNotFound, gin.H{"error": "Skill data not found"})
+            return
+        }
+        resume.Skill = skill
+    } else if resume.Skill.Skill1 != "" {
+        if err := db.Create(&resume.Skill).Error; err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create skill data"})
+            return
+        }
+        resume.SkillID = resume.Skill.ID
+    }
+
+    // บันทึก Resume
+    if err := db.Create(&resume).Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create resume"})
+        return
+    }
+
+    c.JSON(http.StatusOK, resume)
 }
 
 func GetAllResume(c *gin.Context) {

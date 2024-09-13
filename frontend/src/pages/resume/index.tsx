@@ -126,34 +126,24 @@ const ResumeMain = () => {
     <>
       {contextHolder}
       <Row gutter={16}>
-        <Col span={12}>
-          <Title level={2} style={{ color: '#06579b', fontSize: '45px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            การจัดการเรซูเม่
+        <Col span={24} style={{ textAlign: "center" }}>
+          <Title level={2} style={{ color: '#06579b', fontSize: '70px', textTransform: 'uppercase',  letterSpacing: '10px' }}>
+            RESUME
           </Title>
         </Col>
-        <Col span={12} style={{ textAlign: "end", alignSelf: "center" }}>
-          <Space>
+      </Row>
+      <Row gutter={16} style={{ justifyContent: 'center', marginTop: '20px' }}>
+          <Col>
             <Link to="/resume/create">
               <Button type="primary" icon={<PlusOutlined />} style={{ backgroundColor: '#06579b', borderColor: '#06579b', borderRadius: '5px' }}>
                 สร้างเรซูเม่
               </Button>
             </Link>
-          </Space>
-        </Col>
-      </Row>
-      <Divider />
-      <Card style={{ backgroundColor: '#f7f9fc', borderRadius: '10px', padding: '20px' }}>
-        <Row gutter={16}>
-          <Col span={24}>
-            <Input.Search
-              placeholder="ค้นหาตามชื่อหรือตำแหน่ง"
-              onChange={handleSearch}
-              value={searchText}
-              style={{ marginBottom: 16, borderRadius: '5px', border: '1px solid #06579b' }}
-            />
           </Col>
         </Row>
-        <Row gutter={16}>
+      <Divider />
+      <Card style={{ backgroundColor: '#f7f9fc', borderRadius: '10px', padding: '20px', margin: 'auto', width: '100%' }}>
+        <Row gutter={16} style={{ justifyContent: 'center' }}>
           {filteredData.map((resume) => (
             <Col span={8} key={resume.ID} style={{ marginBottom: 16 }}>
               <Card
@@ -162,7 +152,6 @@ const ResumeMain = () => {
                   border: '1px solid #06579b',
                   boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
                   backgroundColor: '#ffffff',
-                  
                 }}
                 title={
                   <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -188,7 +177,7 @@ const ResumeMain = () => {
                   </div>
                 }
                 extra={
-                  <>
+                  <div>
                     <Button
                       type="primary"
                       icon={<EyeOutlined />}
@@ -214,7 +203,7 @@ const ResumeMain = () => {
                     >
                       ลบ
                     </Button>
-                  </>
+                  </div>
                 }
               >
                 <p><strong>ตำแหน่ง:</strong> {getDisplayValue(resume.experience?.JobTitle)}</p>
@@ -229,7 +218,6 @@ const ResumeMain = () => {
                 <p>{getDisplayValue(resume.skill?.skill1)}: {resume.skill?.level1 ?? 0}%</p>
                 <p>{getDisplayValue(resume.skill?.skill2)}: {resume.skill?.level2 ?? 0}%</p>
                 <p>{getDisplayValue(resume.skill?.skill3)}: {resume.skill?.level3 ?? 0}%</p>
-
               </Card>
             </Col>
           ))}
