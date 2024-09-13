@@ -46,6 +46,8 @@ type CreateResumePayload struct {
     StudyID      uint `json:"study_id"`
     ExperienceID uint `json:"experience_id"`
     SkillID      uint `json:"skill_id"`
+    UserID       uint `json:"user_id"`
+
 }
 
 type UpdateResumePayload struct {
@@ -54,7 +56,5 @@ type UpdateResumePayload struct {
     StudyID      uint `json:"study_id"`
     ExperienceID uint `json:"experience_id"`
     SkillID      uint `json:"skill_id"`
-    //เพิ่ม
-    UserID       uint `json:"user_id"`
-}
 
+}

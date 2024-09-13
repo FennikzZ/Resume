@@ -55,9 +55,7 @@ type Resume struct {
     SkillID      uint      `json:"skill_id"`
     Skill        Skill     `gorm:"foreignKey:SkillID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"skill"`
 
-    //เพิ่ม user
-    UserID       uint      `json:"user_id"`
-    User         Users     `gorm:"foreignKey:UserID;references:ID" json:"user"`
+     //เพิ่ม user
+     UserID       uint      `json:"user_id"`
+     User         Users     `gorm:"foreignKey:UserID;references:ID" json:"user"`
 }
-
-
